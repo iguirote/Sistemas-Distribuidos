@@ -11,10 +11,9 @@
 - [Aula 1 — Comunicação em SD](#aula-1--comunicação-em-sd)
 - [Aula 2 — Threads e Seção Crítica](#aula-2--threads-e-seção-crítica)
 - [Aula 4 — Soluções com Threads](#aula-4--soluções-com-threads)
-- [Exercícios](#exercícios)
-- [Desafios ](#desafio--pool-de-threads)
 - [Aula 7 — Sockets](#aula-7--sockets)
 - [Aula 9 — Streams e Serialização](#aula-9--streams-e-serialização)
+
 ---
 
 ## Conceitos Fundamentais
@@ -169,7 +168,6 @@ pool.shutdown();
 
 ---
 
----
 ## Aula 7 — Sockets
 
 ### O que é um Socket ?
@@ -244,19 +242,79 @@ Objeto  → ObjectOutputStream / ObjectInputStream (exige SERIALIZAÇÃO)
 | **String** | `DataOutputStream` / `DataInputStream` | Simples para textos |
 | **Objeto** | `ObjectOutputStream` / `ObjectInputStream` | A classe precisa implementar `Serializable` |
 
-```java
-// Enviando uma String
-DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-out.writeUTF("Olá, servidor!");
+> Exemplo prático com `String` (`writeUTF` / `readUTF`): veja o [Chat Cliente/Servidor](#chat-clienteservidor-aula-9) na seção de Exercícios.
 
-// Recebendo uma String
-DataInputStream in = new DataInputStream(socket.getInputStream());
-String mensagem = in.readUTF();
+---
 
-// Enviando um Objeto (a classe deve implementar Serializable)
-ObjectOutputStream outObj = new ObjectOutputStream(socket.getOutputStream());
-outObj.writeObject(pessoa);
+## Exercícios
+
+### Chat Cliente/Servidor (Aula 9)
+
+Chat simples via console usando `Socket`, `ServerSocket` e threads. O cliente e o servidor trocam mensagens de texto (`String`) usando `DataOutputStream` / `DataInputStream`.
+
+#### Estrutura
+
 ```
+Servidor
+  ├── ServerSocket (porta 1234)
+  ├── Thread enviadora  → lê o console e envia para TODOS os clientes (broadcast)
+  └── Para cada cliente:
+        └── ThreadRecebedora → ouve aquele cliente
+
+Cliente
+  ├── Socket (127.0.0.1:1234)
+  ├── ThreadRecebedora → ouve o servidor
+  └── ThreadEnviadora  → lê o teclado e envia ao servidor
+```
+
+#### Classes
+
+| Classe | Papel |
+|--------|-------|
+| `Servidor` | Abre o `ServerSocket`, aceita clientes com `accept()` e guarda os sockets numa lista |
+| `Cliente` | Conecta ao servidor e dispara as duas threads (receber e enviar) |
+| `Comunicador` | Classe utilitária com `enviaMensagem` e `recebeMensagem` (métodos `static`) |
+| `ThreadRecebedora` | `Runnable` que fica ouvindo um socket e imprime o que chega. Usada pelos dois lados |
+| `ThreadEnviadora` | `Runnable` que lê o teclado e envia pelo socket. Usada só pelo cliente |
+
+#### Comunicador
+
+```java
+public class Comunicador {
+
+    public static String recebeMensagem(Socket s) {
+        try {
+            return new DataInputStream(s.getInputStream()).readUTF(); // bloqueante
+        } catch (Exception e) {
+            return null; // null = conexão encerrada
+        }
+    }
+
+    public static void enviaMensagem(Socket s, String mensagem) {
+        try {
+            new DataOutputStream(s.getOutputStream()).writeUTF(mensagem);
+        } catch (Exception e) { }
+    }
+}
+```
+
+#### Pontos importantes
+
+- **`accept()` é bloqueante**: fica parado até um cliente se conectar. Por isso cada cliente ganha sua própria `ThreadRecebedora`, e o laço volta logo para o `accept()`.
+- **Duas threads no cliente**: ler o teclado e ler o socket são operações bloqueantes. Com uma thread só, uma travaria a outra.
+- **`recebeMensagem` retorna `null` quando a conexão cai**, e é isso que faz a `ThreadRecebedora` sair do laço.
+- **`writeUTF()`** envia o tamanho do texto junto, para o `readUTF()` do outro lado saber onde a mensagem termina.
+- A porta (`1234`) precisa ser a mesma no servidor e no cliente. `127.0.0.1` significa "esta mesma máquina".
+
+#### Como executar
+
+```bash
+javac *.java
+java Servidor      # em um terminal
+java Cliente       # em outro terminal (pode abrir vários)
+```
+
+---
 
 ## Referências
 
