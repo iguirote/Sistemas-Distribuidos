@@ -2,6 +2,7 @@
 
 > Anotações, exercícios e desafios desenvolvidos ao longo das aulas de Sistemas Distribuídos.  
 > Foco em concorrência, paralelismo e comunicação entre processos usando Java.
+> Readme feito com ia, porem utilizando como base exclusivamente meus arquivos e minhas anotações de aula.
 
 ---
 
@@ -316,8 +317,3 @@ java Cliente       # em outro terminal (pode abrir vários)
 
 ---
 
-## Referências
-
-- [Documentação oficial Java — Thread](https://docs.oracle.com/en/java/docs/api/java.base/java/lang/Thread.html)
-- [Documentação oficial Java — ExecutorService](https://docs.oracle.com/en/java/docs/api/java.base/java/util/concurrent/ExecutorService.html)
-- [Arquivo de log usado no desafio](https://raw.githubusercontent.com/alexandrezamberlan/sistemasDistribuidos/refs/heads/master/00-exercicios_trabalhos/erro.log)
