@@ -2,7 +2,8 @@
 
 > Anotações, exercícios e desafios desenvolvidos ao longo das aulas de Sistemas Distribuídos.  
 > Foco em concorrência, paralelismo e comunicação entre processos usando Java.
->  Readme feito com ia, porem utilizando como base exclusivamente meus arquivos e minhas anotações de aula.
+>
+> Readme feito com ia, porem utilizando como base exclusivamente meus arquivos e minhas anotações de aula.
 
 ---
 
