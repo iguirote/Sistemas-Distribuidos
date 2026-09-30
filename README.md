@@ -13,7 +13,8 @@
 - [Aula 4 — Soluções com Threads](#aula-4--soluções-com-threads)
 - [Exercícios](#exercícios)
 - [Desafios ](#desafio--pool-de-threads)
-
+- [Aula 7 — Sockets](#aula-7--sockets)
+- [Aula 9 — Streams e Serialização](#aula-9--streams-e-serialização)
 ---
 
 ## Conceitos Fundamentais
@@ -169,6 +170,93 @@ pool.shutdown();
 ---
 
 ---
+## Aula 7 — Sockets
+
+### O que é um Socket ?
+
+Socket é um meio **lógico** para duas máquinas se conectarem e trocarem dados.
+
+- Sockets **necessitam de threads**, pois enquanto uma thread espera uma leitura (bloqueante), outra precisa continuar trabalhando.
+- O padrão de envio de dados via sockets é o **JSON**.
+- **Serialização** é converter um objeto em uma sequência de bytes para que ele possa ser enviado.
+- Para mandar algo via socket, esse dado precisa poder ser **serializado**.
+
+### Server x Client
+
+```
+Server
+  ├── ServerSocket
+  └── Socket (representa o cliente)
+        ├── Escritor ┐
+        └── Leitor   ┴→ de sockets
+
+Client
+  ├── Socket
+  ├── Escritor ┐
+  └── Leitor   ┴→ de sockets
+```
+
+Fluxo da comunicação:
+
+```
+Cliente  →  Servidor  →  Cliente(s)
+```
+
+### Atividade
+
+| | Descrição |
+|-|-----------|
+| **Cliente** | `JFrame` com campo de input para o nome, botão de enviar e campo de email que exibe a resposta do servidor |
+| **Servidor** | `JFrame` com um `JTextArea` mostrando a lista de pessoas no formato `nome - email` |
+
+> **Regra:** toda vez que o servidor receber um usuário novo, a lista deve ser **ordenada pelo nome**.
+
+---
+
+## Aula 9 — Streams e Serialização
+
+### Passo a passo da conexão
+
+| | Cliente | Servidor |
+|-|---------|----------|
+| **1** | `Socket` | `ServerSocket` (endereço IP + porta de serviço) |
+| **2** | Output | `Socket` (representa o cliente) |
+| **3** | Input | `OutputStream` |
+| **4** | — | `InputStream` |
+
+```
+Servidor  ←——————→  Cliente
+IP Servidor          IP Cliente
+Porta Servidor       Porta Cliente
+```
+
+### O que passa no Socket ?
+
+```
+Bytes   → preferido, pois qualquer tecnologia consegue ler
+String  → DataOutputStream / DataInputStream
+Objeto  → ObjectOutputStream / ObjectInputStream (exige SERIALIZAÇÃO)
+```
+
+| Tipo | Classes de escrita/leitura | Observação |
+|------|----------------------------|------------|
+| **Bytes** | `OutputStream` / `InputStream` | Mais compatível entre tecnologias |
+| **String** | `DataOutputStream` / `DataInputStream` | Simples para textos |
+| **Objeto** | `ObjectOutputStream` / `ObjectInputStream` | A classe precisa implementar `Serializable` |
+
+```java
+// Enviando uma String
+DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+out.writeUTF("Olá, servidor!");
+
+// Recebendo uma String
+DataInputStream in = new DataInputStream(socket.getInputStream());
+String mensagem = in.readUTF();
+
+// Enviando um Objeto (a classe deve implementar Serializable)
+ObjectOutputStream outObj = new ObjectOutputStream(socket.getOutputStream());
+outObj.writeObject(pessoa);
+```
 
 ## Referências
 
